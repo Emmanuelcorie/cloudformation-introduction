@@ -40,5 +40,5 @@ Resources:
   S3BucketInvoice:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: kotoh
+      BucketName: korie
       AccessControl: Private
