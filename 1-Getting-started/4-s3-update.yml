@@ -5,5 +5,5 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket    
     Properties:
-      BucketName: vamsi-bucket-32472      
+      BucketName: jjtech-cft-wawa-demo-20      
       AccessControl: PublicRead
