@@ -1,0 +1,205 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Master stack: PathToMasterStackFile'
+
+Parameters:
+  development:
+    Description: dev Branch of my work
+    Type: String
+
+  devCidr:
+    Description: this is cidr for dev vpc 
+    Type: String
+    Default: 12.0.0.0/16
+
+  PublicSubnet1CIDR:
+    Description: the public subne
+    Type: String
+    Default: 12.0.1.0/24
+
+  PublicSubnet2CIDR:
+    Description: the public subne
+    Type: String
+    Default: 12.0.2.0/24
+
+  PrivateSubnet1CIDR:
+    Description: the private subne
+    Type: String
+    Default: 12.0.4.0/24
+
+  PrivateSubnet2CIDR:
+    Description: the private subne
+    Type: String
+    Default: 12.0.6.0/24
+
+
+ 
+
+Resources:
+  devVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref devCidr
+      EnableDnsHostnames: false
+      EnableDnsSupport: false
+      Tags: 
+        - Key: Name
+          Value: !Ref development
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref devVpc
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PublicSubnet1CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${development} Public Subnet (AZ1)
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref devVpc
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PublicSubnet2CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${development} Public Subnet (AZ2)
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref devVpc
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${development} Private Subnet (AZ2)
+
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref devVpc
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${development} Private Subnet (AZ1)
+
+
+  myIgw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags: 
+        - Key: Name
+          Value: !Ref development
+
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref myIgw
+      VpcId: !Ref devVpc
+
+  NatGatewayEIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: devVpc
+
+  myNatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayEIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags: 
+        - Key: Name
+          Value: !Ref development
+
+  mypublicRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref devVpc
+      Tags: 
+        - Key: Name
+          Value:  !Sub ${development} Public Routes
+
+  mypublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref myIgw
+      RouteTableId: !Ref mypublicRT
+
+  PublicSubnet1RTassoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref mypublicRT
+      SubnetId: !Ref PublicSubnet1
+
+  devWebserver:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: "ami-03972092c42e8c0ca"
+      InstanceType: "t2.micro"
+      KeyName: ansible-key
+      VpcId: !Ref devVpc
+      SubnetId: !Ref PublicSubnet1
+      BlockDeviceMappings: 
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp2
+            DeleteOnTermination: true
+            VolumeSize: 8
+      
+  AppWebserver:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: "ami-03972092c42e8c0ca"
+      InstanceType: "t2.micro"
+      KeyName: ansible-key
+      VpcId: !Ref devVpc
+      SubnetId: !Ref PublicSubnet2
+      BlockDeviceMappings: 
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp2
+            DeleteOnTermination: true
+            VolumeSize: 10
+
+  mydevSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to client host, ssh
+      VpcId: !Ref devVpc
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+
+  Resources:
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: koriebucket
+      AccessControl: Private
+
+
+
+  
+
+  
+
+     
+  

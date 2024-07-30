@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "A Sample template"
+
+  
+Resources:
+  Webserver:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: "ami-03972092c42e8c0ca"
+      InstanceType: "t2.micro"
+      KeyName: "ansible-key"
+      BlockDeviceMappings:
+      - DeviceName: "/dev/sdm"
+        Ebs:
+         VolumeType: "io1"
+         VolumeSize: "8"
+         Iops: "200"
+         DeleteOnTermination: "true"
+      Tags:
+        - Key: "Name"
+          Value: "webserver" 
+        - Key: "Environment"
+          Value: "dev"
+
+  Appserver:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: "ami-03972092c42e8c0ca"
+      InstanceType: "t2.micro"
+      KeyName: "ansible-key"
+      BlockDeviceMappings:
+      - DeviceName: "/dev/sdm"
+        Ebs:
+         VolumeType: "io1"
+         VolumeSize: "8"
+         Iops: "200"
+         DeleteOnTermination: "true"
+      Tags:
+        - Key: "Name"
+          Value: "Appserver" 
+        - Key: "Environment"
+          Value: "dev"
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: bucketinvoicekorie
+      AccessControl: Private

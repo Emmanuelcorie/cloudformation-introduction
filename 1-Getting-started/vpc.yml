@@ -1,0 +1,15 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Master stack: PathToMasterStackFile'
+
+Resources:
+  myVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: false
+      EnableDnsSupport: false
+      Tags: 
+        - Key: Name
+          Value: "!Ref prod"
+  

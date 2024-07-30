@@ -1,0 +1,27 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Master stack: PathToMasterStackFile'
+
+Parameters:
+  production:
+    Description: cidr for application Vpc
+    Type: String
+
+  cidrAppVpc:
+    Description: para for app vpc
+    Type: String
+    Default: 11.0.0.0/16
+
+
+Resources:
+  AppVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: "!Ref cidrAppVpc"
+      EnableDnsHostnames: false
+      EnableDnsSupport: false
+      Tags: 
+        - Key: Name
+          Value: "!Ref production"
+  
+
