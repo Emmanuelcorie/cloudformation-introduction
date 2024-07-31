@@ -1,19 +1,47 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: “A sample template”
+
+Parameters:
+  InstanceTypeParameter:
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+
+  KeyNameParameter:
+    Description: enter key name
+    Default: AWS::EC2::KeyPair::KeyName
+    Type: String
+
+  Ec2VolumsizeParameter:
+    Description: choose a size
+    Type: String
+    Default: "5"
+
+  AmiID:
+    Description: Remember AMI IS Region specific
+    Type: String
+    Default: "ami-0427090fd1714168b"
+
+    
+
 Resources:
   WebServer:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: "ami-0427090fd1714168b"
-      InstanceType: t2.micro
-      KeyName: "ansible-key"
+      ImageId: !Ref AmiID
+      InstanceType: !Ref InstanceTypeParameter
+      KeyName: !Ref KeyNameParameter
       BlockDeviceMappings:
         - DeviceName: "/dev/xvda"
           Ebs:
             VolumeType: "io1"
             Iops: "200"
             DeleteOnTermination: "true"
-            VolumeSize: '10'
+            VolumeSize: !Ref Ec2VolumsizeParameter
       Tags:
         - Key: "Name"
           Value: "WebServer"
@@ -22,21 +50,23 @@ Resources:
   AppServer:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: "ami-0427090fd1714168b"
-      InstanceType: t2.micro
-      KeyName: "ansible-key"
+      ImageId: !Ref AmiID
+      InstanceType: !Ref InstanceTypeParameter
+      KeyName: !Ref KeyNameParameter
       BlockDeviceMappings:
         - DeviceName: "/dev/xvda"
           Ebs:
             VolumeType: io1
             Iops: '200'
             DeleteOnTermination: "true"
-            VolumeSize: "10"
+            VolumeSize: !Ref Ec2VolumsizeParameter
       Tags:
         - Key: "Name"
           Value: "AppServer"
         - Key: "Environment"
           Value: "dev"
+
+          
   S3BucketInvoice:
     Type: AWS::S3::Bucket
     Properties:
