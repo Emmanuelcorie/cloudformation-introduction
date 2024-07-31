@@ -36,7 +36,7 @@ Resources:
         - Key: "Name"
           Value: "AppServer"
         - Key: "Environment"
-          Value: "Dev"
+          Value: "dev"
   S3BucketInvoice:
     Type: AWS::S3::Bucket
     Properties:
